@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("0-Inventário de Equipamentos de Rede")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+dcf03d6088e6ab3ae3039aa9e3c5b0f3cbaf00c6")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ea4511cb5a8a034993e992cb469550dca034f62c")]
 [assembly: System.Reflection.AssemblyProductAttribute("0-Inventário de Equipamentos de Rede")]
 [assembly: System.Reflection.AssemblyTitleAttribute("0-Inventário de Equipamentos de Rede")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

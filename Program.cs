@@ -230,6 +230,90 @@ static List<Equipamento> FiltrarPorStatus(Status status)
     return equipamentos;
 }
 
+static void AlterarStatus(int codigo, Status novoStatus)
+{
+    using var db = new MeuDbContext();
+    var equipamento = db.equipamentos.FirstOrDefault(e => e.Codigo == codigo);
+    if (equipamento != null)
+    {
+        if (novoStatus == Status.manutenção)
+        {
+            equipamento.DataUltimaManutencao = DateTime.Now;
+        }
+        equipamento.Statu = novoStatus;
+        db.SaveChanges();
+        Console.WriteLine("Status alterado com sucesso!");
+    }
+    else
+    {
+        Console.WriteLine("Equipamento não encontrado!");
+    }
+}
+
+static void RegistrarManutencao(int codigo, DateTime dataManutencao)
+{
+    using var db = new MeuDbContext();
+    var equipamento = db.equipamentos.FirstOrDefault(e => e.Codigo == codigo);
+    if (equipamento != null)
+    {
+        equipamento.DataUltimaManutencao = dataManutencao;
+        db.SaveChanges();
+        Console.WriteLine("Manutenção registrada com sucesso!");
+    }
+    else
+    {
+        Console.WriteLine("Equipamento não encontrado!");
+    }
+}
+
+static void ListarEquipamentosSemManutencaoRecente()
+{
+    using var db = new MeuDbContext();
+    var equipamentos = db.equipamentos.Where(e => !e.DataUltimaManutencao.HasValue || e.DataUltimaManutencao.Value < DateTime.Now.AddMonths(-6)).ToList();
+
+    Console.Clear();
+    Console.WriteLine("Equipamentos sem manutenção recente (últimos 6 meses):");
+    foreach (var equipamento in equipamentos)
+    {
+        Console.WriteLine($"Código: {equipamento.Codigo}\n Nome: {equipamento.NomeDescricao}\n Tipo: {equipamento.Tipo}\n Fabricante: {equipamento.Fabricante}\n Modelo: {equipamento.Modelo}\n IP: {equipamento.IP}\n Localização: {equipamento.Localizacao}\n Data de Instalação: {equipamento.DataInstalacao}\n Status: {equipamento.Statu}\n Data da Última Manutenção: {(equipamento.DataUltimaManutencao.HasValue ? equipamento.DataUltimaManutencao.Value.ToString("dd/MM/yyyy") : "Sem manutenção registrada")}\n Observação: {equipamento.Observacao}");
+        Console.WriteLine("------------------------------------------------------------");
+    }
+
+    Console.WriteLine("Pressione qualquer tecla para continuar...");
+    Console.ReadKey();
+    Console.Clear();
+}
+
+static void ExibirResumoInventario()
+{
+    using var db = new MeuDbContext();
+    var totalEquipamentos = db.equipamentos.Count();
+    var equipamentosPorTipo = db.equipamentos.GroupBy(e => e.Tipo)
+                                             .Select(g => new { Tipo = g.Key, Quantidade = g.Count() })
+                                             .ToList();
+    var equipamentosPorStatus = db.equipamentos.GroupBy(e => e.Statu)
+                                               .Select(g => new { Status = g.Key, Quantidade = g.Count() })
+                                               .ToList();
+
+    Console.Clear();
+    Console.WriteLine("Resumo do Inventário:");
+    Console.WriteLine($"Total de Equipamentos: {totalEquipamentos}");
+    Console.WriteLine("Equipamentos por Tipo:");
+    foreach (var item in equipamentosPorTipo)
+    {
+        Console.WriteLine($"Tipo: {item.Tipo}, Quantidade: {item.Quantidade}");
+    }
+    Console.WriteLine("Equipamentos por Status:");
+    foreach (var item in equipamentosPorStatus)
+    {
+        Console.WriteLine($"Status: {item.Status}, Quantidade: {item.Quantidade}");
+    }
+
+    Console.WriteLine("Pressione qualquer tecla para continuar...");
+    Console.ReadKey();
+    Console.Clear();
+}
+
 try
     {
         int opcao;
@@ -349,12 +433,61 @@ try
                         }
                         break;
                     case 7:
+                        Console.Write("Digite o código do equipamento que deseja alterar o status: ");
+                        if (int.TryParse(Console.ReadLine(), out int codigo2))
+                        {
+                            Console.Write("Digite o novo status: ");
+                            string novoStatusStr = Console.ReadLine()!;
+                            if (Enum.TryParse<Status>(novoStatusStr, out Status novoStatus))
+                            {
+                                AlterarStatus(codigo2, novoStatus);
+                            }
+                            else
+                            {
+                                Console.Clear();
+                                Console.WriteLine("Status inválido!");
+                                Console.WriteLine("Pressione qualquer tecla para continuar...");
+                                Console.ReadKey();
+                            }
+                        }
+                        else
+                        {
+                            Console.Clear();
+                            Console.WriteLine("Código inválido!");
+                            Console.WriteLine("Pressione qualquer tecla para continuar...");
+                            Console.ReadKey();
+                        }
                         break;
                     case 8:
+                        Console.Write("Digite o código do equipamento que deseja registrar a manutenção: ");
+                        if (int.TryParse(Console.ReadLine(), out int codigo3))
+                        {
+                            Console.Write("Digite a data da manutenção (dd/MM/yyyy): ");
+                            if (DateTime.TryParse(Console.ReadLine(), out DateTime dataManutencao))
+                            {
+                                RegistrarManutencao(codigo3, dataManutencao);
+                            }
+                            else
+                            {
+                                Console.Clear();
+                                Console.WriteLine("Data inválida!");
+                                Console.WriteLine("Pressione qualquer tecla para continuar...");
+                                Console.ReadKey();
+                            }
+                        }
+                        else
+                        {
+                            Console.Clear();
+                            Console.WriteLine("Código inválido!");
+                            Console.WriteLine("Pressione qualquer tecla para continuar...");
+                            Console.ReadKey();
+                        }
                         break;
                     case 9:
+                        ListarEquipamentosSemManutencaoRecente();
                         break;
                     case 10:
+                        ExibirResumoInventario();
                         break;
                 }
             }
