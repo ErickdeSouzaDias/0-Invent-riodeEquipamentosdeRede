@@ -223,6 +223,13 @@ static List<Equipamento> FiltrarPorLocalizacao(string localizacao)
     return equipamentos;
 }
 
+static List<Equipamento> FiltrarPorStatus(Status status)
+{
+    using var db = new MeuDbContext();
+    var equipamentos = db.equipamentos.Where(e => e.Statu == status).ToList();
+    return equipamentos;
+}
+
 try
     {
         int opcao;
@@ -310,6 +317,36 @@ try
                     }
                         
                     case 6:
+                        Console.Write("Digite o status que deseja filtrar: ");
+                        string statusStr = Console.ReadLine()!;
+                        if (Enum.TryParse<Status>(statusStr, out Status status))
+                        {
+                            var equipamentos = FiltrarPorStatus(status);
+                            if (equipamentos.Count == 0 || equipamentos == null)
+                            {
+                                Console.Clear();
+                                Console.WriteLine("Nenhum equipamento encontrado com esse status!");
+                                Console.WriteLine("Pressione qualquer tecla para continuar...");
+                                Console.ReadKey();
+                            }
+                            else
+                            {
+                                foreach (var equip in equipamentos)
+                                {
+                                    Console.Clear();
+                                    Console.WriteLine($"Código: {equip.Codigo}\n Nome: {equip.NomeDescricao}\n Tipo: {equip.Tipo}\n Fabricante: {equip.Fabricante}\n Modelo: {equip.Modelo}\n IP: {equip.IP}\n Localização: {equip.Localizacao}\n Data de Instalação: {equip.DataInstalacao}\n Status: {equip.Statu}\n Data da Última Manutenção: {(equip.DataUltimaManutencao.HasValue ? equip.DataUltimaManutencao.Value.ToString("dd/MM/yyyy") : "Sem manutenção registrada")}\n Observação: {equip.Observacao}");
+                                    Console.WriteLine("Pressione qualquer tecla para continuar...");
+                                    Console.ReadKey();
+                                }
+                            }
+                        }
+                        else
+                        {
+                            Console.Clear();
+                            Console.WriteLine("Status inválido!");
+                            Console.WriteLine("Pressione qualquer tecla para continuar...");
+                            Console.ReadKey();
+                        }
                         break;
                     case 7:
                         break;
